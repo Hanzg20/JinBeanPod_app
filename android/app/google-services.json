@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "628639117533",
+    "project_id": "jinbeanpod",
+    "storage_bucket": "jinbeanpod.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:628639117533:android:25421734c44ff07bd72b34",
+        "android_client_info": {
+          "package_name": "com.goldsky.jinbean"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "628639117533-otm6t05u4u9c67nfd2ece4cieig9qpem.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.goldsky.jinbean",
+            "certificate_hash": "77014aba7d5fc48a0370f133ac2fff2f18ebaab9"
+          }
+        },
+        {
+          "client_id": "628639117533-li2oe27vavp6p8n4i2s00fqdokcudkvb.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCl6oiOPbEm2tpuVys9I0XtcttzhJY0354"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "628639117533-li2oe27vavp6p8n4i2s00fqdokcudkvb.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "628639117533-2ojfh2sm168da1uvcegmiftiiku4e849.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.glodsky.jinbean"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
