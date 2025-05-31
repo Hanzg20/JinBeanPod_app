@@ -2,6 +2,12 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>CLIENT_ID</key>
+	<string>628639117533-2ojfh2sm168da1uvcegmiftiiku4e849.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.628639117533-2ojfh2sm168da1uvcegmiftiiku4e849</string>
+	<key>ANDROID_CLIENT_ID</key>
+	<string>628639117533-otm6t05u4u9c67nfd2ece4cieig9qpem.apps.googleusercontent.com</string>
 	<key>API_KEY</key>
 	<string>AIzaSyDwx8KcK71tTEJrPTTBROt-5xMrr7QnlJw</string>
 	<key>GCM_SENDER_ID</key>
@@ -9,7 +15,7 @@
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
-	<string>com.goldsky.jinbean</string>
+	<string>com.glodsky.jinbean</string>
 	<key>PROJECT_ID</key>
 	<string>jinbeanpod</string>
 	<key>STORAGE_BUCKET</key>

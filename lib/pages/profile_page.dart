@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'avatar_edit_page.dart';
 
@@ -36,7 +35,7 @@ class _ProfilePageState extends State<ProfilePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('个人资料'),
+        title: const Text('个人资料'),
         centerTitle: true,
       ),
       body: SingleChildScrollView(

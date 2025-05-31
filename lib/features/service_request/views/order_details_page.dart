@@ -250,7 +250,7 @@ class OrderDetailsPage extends StatelessWidget {
                         Container(
                           width: 12.w,
                           height: 12.w,
-                          decoration: BoxDecoration(
+                          decoration: const BoxDecoration(
                             color: Colors.blue,
                             shape: BoxShape.circle,
                           ),

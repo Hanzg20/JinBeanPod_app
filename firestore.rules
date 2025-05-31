@@ -1,0 +1,21 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 用户集合规则
+    match /users/{userId} {
+      // 允许用户读取和更新自己的资料
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // 测试集合规则（仅用于初始化测试）
+    match /test/{document=**} {
+      allow read, write: if request.auth != null;
+    }
+    
+    // 默认规则：拒绝所有未明确允许的访问
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+} 

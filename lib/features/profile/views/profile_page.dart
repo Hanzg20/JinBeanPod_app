@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../../../core/controllers/auth_controller.dart';
+import '../../../app/controllers/auth_controller.dart';
 import 'messages_page.dart';
 import 'settings_page.dart';
 import 'my_demands_page.dart';
@@ -77,7 +77,7 @@ class ProfilePage extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 20),
             child: ElevatedButton(
               onPressed: () {
-                authController.logout();
+                authController.signOut();
               },
               style: ElevatedButton.styleFrom(
                 minimumSize: const Size.fromHeight(48),

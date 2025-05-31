@@ -1,2 +1,11 @@
 #include? "Pods/Target Support Files/Pods-Runner/Pods-Runner.debug.xcconfig"
 #include "Generated.xcconfig"
+
+CLANG_CXX_LANGUAGE_STANDARD = c++14
+CLANG_CXX_LIBRARY = libc++
+ENABLE_BITCODE = NO
+ONLY_ACTIVE_ARCH = YES
+EXCLUDED_ARCHS[sdk=iphonesimulator*] = i386
+OTHER_CFLAGS = $(inherited) -Wno-comma -Wno-shorten-64-to-32
+OTHER_LDFLAGS = $(inherited) -ObjC
+OTHER_CPLUSPLUSFLAGS = $(inherited) -std=c++14

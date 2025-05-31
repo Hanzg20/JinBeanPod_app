@@ -1,19 +1,50 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:get_storage/get_storage.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'app/routes/app_pages.dart';
+import 'app/app.dart';
+import 'core/config/supabase_config.dart';
+import 'app/services/auth_service.dart';
+import 'app/controllers/auth_controller.dart';
+import 'features/main/controllers/main_controller.dart';
+import 'core/translations/app_translations.dart';
 import 'core/controllers/settings_controller.dart';
-import 'core/translations/translations.dart' as app_translations;
-import 'features/main/views/main_page.dart';
+import 'core/controllers/language_controller.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await GetStorage.init();
   
-  // 初始化设置控制器
-  final settingsController = Get.put(SettingsController());
-  await settingsController.loadSettings();
+  try {
+    // 初始化 Supabase
+    await Supabase.initialize(
+      url: SupabaseConfig.url,
+      anonKey: SupabaseConfig.anonKey,
+    );
+    
+    // 初始化 SharedPreferences
+    final prefs = await SharedPreferences.getInstance();
+    Get.put(prefs, permanent: true);
 
-  runApp(const MyApp());
+    // 初始化 AuthService 和 AuthController
+    Get.put(AuthService(), permanent: true);
+    Get.put(AuthController(), permanent: true);
+    
+    // 初始化 MainController
+    Get.put(MainController(), permanent: true);
+
+    // 初始化 SettingsController
+    Get.put(SettingsController(), permanent: true);
+
+    // 初始化 LanguageController
+    Get.put(LanguageController(), permanent: true);
+
+    runApp(const App());
+  } catch (e) {
+    debugPrint('Error during initialization: $e');
+    rethrow;
+  }
 }
 
 class MyApp extends StatelessWidget {
@@ -21,25 +52,26 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final settingsController = Get.find<SettingsController>();
-
-    return Obx(() => GetMaterialApp(
-      title: 'JinDouJia Services',
-      translations: app_translations.AppTranslations(),
-      locale: settingsController.currentLocale,
-      fallbackLocale: const Locale('zh', 'CN'),
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.green),
-        useMaterial3: true,
-      ),
-      darkTheme: ThemeData.dark(useMaterial3: true).copyWith(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.green,
-          brightness: Brightness.dark,
-        ),
-      ),
-      themeMode: settingsController.themeMode,
-      home: const MainPage(),
-    ));
+    return ScreenUtilInit(
+      designSize: const Size(375, 812),
+      minTextAdapt: true,
+      splitScreenMode: true,
+      builder: (context, child) {
+        return GetMaterialApp(
+          title: '金豆荚',
+          theme: ThemeData(
+            primarySwatch: Colors.blue,
+            visualDensity: VisualDensity.adaptivePlatformDensity,
+            useMaterial3: true,
+          ),
+          initialRoute: AppPages.INITIAL,
+          getPages: AppPages.routes,
+          defaultTransition: Transition.fadeIn,
+          translations: AppTranslations(),
+          locale: const Locale('zh', 'CN'),
+          fallbackLocale: const Locale('en', 'US'),
+        );
+      },
+    );
   }
 }

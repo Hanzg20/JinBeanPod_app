@@ -1,10 +1,8 @@
 # Uncomment this line to define a global platform for your project
-platform :ios, '12.0'
+platform :ios, '13.0'
 
 # CocoaPods analytics sends network stats synchronously affecting flutter build latency.
 ENV['COCOAPODS_DISABLE_STATS'] = 'true'
-
-source 'https://github.com/CocoaPods/Specs.git'
 
 project 'Runner', {
   'Debug' => :debug,
@@ -32,7 +30,7 @@ flutter_ios_podfile_setup
 target 'Runner' do
   use_frameworks!
   use_modular_headers!
-
+  
   flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
   target 'RunnerTests' do
     inherit! :search_paths
@@ -40,16 +38,50 @@ target 'Runner' do
 end
 
 post_install do |installer|
+  # This removes the warning about having to upgrade to a higher iOS version
+  installer.generated_projects.each do |project|
+    project.targets.each do |target|
+      target.build_configurations.each do |config|
+        config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '13.0'
+      end
+    end
+  end
+  
   installer.pods_project.targets.each do |target|
     flutter_additional_ios_build_settings(target)
+    
     target.build_configurations.each do |config|
-      config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '12.0'
-      config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] ||= [
-        '$(inherited)',
-        'PERMISSION_CAMERA=1',
-        'PERMISSION_PHOTOS=1',
-        'PERMISSION_LOCATION=1',
-      ]
+      config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '13.0'
+      config.build_settings['CODE_SIGNING_ALLOWED'] = 'NO'
+      config.build_settings['ENABLE_BITCODE'] = 'NO'
+      config.build_settings['ONLY_ACTIVE_ARCH'] = 'YES'
+      
+      # Enhanced gRPC configuration
+      if target.name.include?('gRPC') || target.name.include?('BoringSSL') || target.name.include?('abseil')
+        config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] ||= ['$(inherited)']
+        config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] << 'GRPC_CFSTREAM=1'
+        config.build_settings['CLANG_WARN_DOCUMENTATION_COMMENTS'] = 'NO'
+        config.build_settings['CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES'] = 'YES'
+        config.build_settings['CLANG_CXX_LANGUAGE_STANDARD'] = 'c++14'
+        config.build_settings['CLANG_CXX_LIBRARY'] = 'libc++'
+        
+        # Remove problematic compiler flags and add necessary ones
+        config.build_settings['OTHER_CFLAGS'] = '$(inherited) -Wno-comma -Wno-shorten-64-to-32'
+        config.build_settings['OTHER_LDFLAGS'] = '$(inherited) -ObjC'
+        config.build_settings['OTHER_CPLUSPLUSFLAGS'] = '$(inherited) -std=c++14'
+        
+        # Additional build settings for simulator
+        if config.build_settings['SDKROOT'] == 'iphonesimulator'
+          config.build_settings['EXCLUDED_ARCHS[sdk=iphonesimulator*]'] = 'i386'
+          config.build_settings['ONLY_ACTIVE_ARCH'] = 'YES'
+          config.build_settings['DEFINES_MODULE'] = 'YES'
+          
+          # Force disable problematic compiler options for simulator
+          config.build_settings.delete('OTHER_CFLAGS')
+          config.build_settings.delete('OTHER_LDFLAGS')
+          config.build_settings.delete('OTHER_CPLUSPLUSFLAGS')
+        end
+      end
     end
   end
 end

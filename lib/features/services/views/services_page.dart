@@ -9,7 +9,7 @@ class ServicesPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('全部服务'),
+        title: Text('services_title'.tr),
         centerTitle: true,
       ),
       body: GridView.builder(
@@ -18,41 +18,55 @@ class ServicesPage extends StatelessWidget {
           crossAxisCount: 2,
           mainAxisSpacing: 16.0,
           crossAxisSpacing: 16.0,
-          childAspectRatio: 0.8,
+          childAspectRatio: 1.0,
         ),
         itemCount: AppConstants.serviceCategories.length,
         itemBuilder: (context, index) {
           final category = AppConstants.serviceCategories[index];
           return Card(
+            elevation: 4.0,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12.0),
+            ),
+            clipBehavior: Clip.antiAlias,
             child: InkWell(
               onTap: () {
-                // TODO: 跳转到服务详情页
+                // TODO: 跳转到服务详情页，传递类别信息
+                // Get.to(() => ServiceDetailPage(), arguments: category);
               },
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Container(
-                    padding: const EdgeInsets.all(16.0),
-                    decoration: BoxDecoration(
+                  Expanded(
+                    child: Container(
                       color: Colors.blue.withOpacity(0.1),
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(
-                      Icons.cleaning_services,
-                      color: Theme.of(context).primaryColor,
-                      size: 48.0,
+                      child: Icon(
+                        Icons.cleaning_services,
+                        color: Theme.of(context).primaryColor,
+                        size: 40.0,
+                      ),
                     ),
                   ),
-                  const SizedBox(height: 16.0),
-                  Text(
-                    category['label']!,
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
-                  const SizedBox(height: 8.0),
-                  Text(
-                    '查看详情',
-                    style: TextStyle(
-                      color: Theme.of(context).primaryColor,
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          category['label']!,
+                          style: Theme.of(context).textTheme.titleSmall,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 4.0),
+                        Text(
+                          'view_details'.tr,
+                          style: TextStyle(
+                            color: Theme.of(context).primaryColor,
+                            fontSize: 12.0,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ],

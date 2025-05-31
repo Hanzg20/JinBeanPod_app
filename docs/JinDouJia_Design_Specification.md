@@ -21,7 +21,7 @@
 - 实现用户、服务商、平台三方共赢
 
 ### 1.3 系统组成
-- 用户端应用（iOS/Android/Web）
+- 用户端应用（iOS/Android/web）
 - 管理后台（Web）
 - 服务商端应用（iOS/Android）
 
@@ -35,7 +35,7 @@
 │   ├── 服务商端（Flutter）
 │   └── 管理后台（Flutter Web）
 ├── 后端服务
-│   └── Firebase
+│   └── Supabase
 │       ├── Authentication
 │       ├── Firestore
 │       ├── Storage

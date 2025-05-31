@@ -31,7 +31,7 @@
 1. 确保已安装 Flutter 开发环境
 2. 克隆项目
 ```bash
-git clone https://github.com/yourusername/service_app.git
+git clone https://github.com/yourusername/JinBeanPod_app.git
 ```
 3. 安装依赖
 ```bash

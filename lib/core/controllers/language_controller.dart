@@ -40,12 +40,22 @@ class LanguageController extends GetxController {
   }
 
   Future<void> loadSelectedLanguage() async {
-    final prefs = await SharedPreferences.getInstance();
+    final prefs = Get.find<SharedPreferences>();
     final savedLanguage = prefs.getString(languageKey);
-    if (savedLanguage != null) {
-      currentLanguage.value = savedLanguage;
-      await updateLanguage(savedLanguage);
+    
+    debugPrint('LanguageController: Loaded saved language: $savedLanguage'); // Debug print
+
+    String languageToApply = 'zh_CN'; // Default to Chinese
+
+    if (savedLanguage != null && languages.any((lang) => lang['code'] == savedLanguage)) {
+      // If a valid language is saved, use it
+      languageToApply = savedLanguage;
     }
+
+    debugPrint('LanguageController: Applying language: $languageToApply'); // Debug print
+
+    // Apply the language and save it if it was the default
+    await updateLanguage(languageToApply);
   }
 
   Future<void> updateLanguage(String languageCode) async {

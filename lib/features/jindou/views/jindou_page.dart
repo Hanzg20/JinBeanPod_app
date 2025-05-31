@@ -112,9 +112,9 @@ class JinDouPage extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 12.0),
-                Text(
+                const Text(
                   '今天完成了一单家政服务，服务很满意，给大家分享一下经验...',
-                  style: const TextStyle(fontSize: 16.0),
+                  style: TextStyle(fontSize: 16.0),
                 ),
                 const SizedBox(height: 12.0),
                 if (index % 2 == 0)

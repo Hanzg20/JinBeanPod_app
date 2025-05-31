@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../core/controllers/settings_controller.dart';
+import '../../../core/controllers/language_controller.dart';
 
 class SettingsPage extends StatelessWidget {
   const SettingsPage({super.key});
@@ -8,6 +9,7 @@ class SettingsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final settingsController = Get.find<SettingsController>();
+    final languageController = Get.find<LanguageController>();
 
     return Scaffold(
       appBar: AppBar(
@@ -17,10 +19,10 @@ class SettingsPage extends StatelessWidget {
       body: ListView(
         children: [
           // 账号设置
-          _buildSectionHeader('account_settings'.tr),
+          _buildSectionHeader('settings'.tr),
           ListTile(
             leading: const Icon(Icons.person_outline),
-            title: Text('profile_settings'.tr),
+            title: Text('profile_settings_title'.tr),
             trailing: const Icon(Icons.chevron_right),
             onTap: () {
               // TODO: 跳转到个人资料设置页面
@@ -28,7 +30,7 @@ class SettingsPage extends StatelessWidget {
           ),
           ListTile(
             leading: const Icon(Icons.security),
-            title: Text('security_settings'.tr),
+            title: Text('security_settings_title'.tr),
             trailing: const Icon(Icons.chevron_right),
             onTap: () {
               // TODO: 跳转到安全设置页面
@@ -36,7 +38,7 @@ class SettingsPage extends StatelessWidget {
           ),
           ListTile(
             leading: const Icon(Icons.privacy_tip_outlined),
-            title: Text('privacy_settings'.tr),
+            title: Text('privacy_settings_title'.tr),
             trailing: const Icon(Icons.chevron_right),
             onTap: () {
               // TODO: 跳转到隐私设置页面
@@ -44,17 +46,15 @@ class SettingsPage extends StatelessWidget {
           ),
 
           // 通用设置
-          _buildSectionHeader('general_settings'.tr),
+          _buildSectionHeader('settings'.tr),
           ListTile(
             leading: const Icon(Icons.language),
-            title: Text('language'.tr),
+            title: Text('language_settings_title'.tr),
             trailing: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Obx(() => Text(
-                      settingsController.currentLocale.languageCode == 'zh'
-                          ? '中文'
-                          : 'English',
+                      languageController.getCurrentLanguageName(),
                       style: TextStyle(
                         color: Theme.of(context).hintColor,
                       ),
@@ -83,32 +83,19 @@ class SettingsPage extends StatelessWidget {
                           borderRadius: BorderRadius.circular(2),
                         ),
                       ),
-                      ListTile(
-                        title: const Text('中文'),
-                        trailing: Obx(() => settingsController.currentLocale.languageCode == 'zh'
-                            ? Icon(
-                                Icons.check,
-                                color: Theme.of(context).primaryColor,
-                              )
-                            : const SizedBox.shrink()),
-                        onTap: () {
-                          settingsController.updateLocale('zh_CN');
-                          Get.back();
-                        },
-                      ),
-                      ListTile(
-                        title: const Text('English'),
-                        trailing: Obx(() => settingsController.currentLocale.languageCode == 'en'
-                            ? Icon(
-                                Icons.check,
-                                color: Theme.of(context).primaryColor,
-                              )
-                            : const SizedBox.shrink()),
-                        onTap: () {
-                          settingsController.updateLocale('en_US');
-                          Get.back();
-                        },
-                      ),
+                      ...languageController.languages.map((lang) => ListTile(
+                            title: Text(lang['name'] as String),
+                            trailing: Obx(() => languageController.currentLanguage.value == lang['code']
+                                ? Icon(
+                                    Icons.check,
+                                    color: Theme.of(context).primaryColor,
+                                  )
+                                : const SizedBox.shrink()),
+                            onTap: () {
+                              languageController.updateLanguage(lang['code'] as String);
+                              Get.back();
+                            },
+                          )).toList(),
                       const SizedBox(height: 8),
                     ],
                   ),
@@ -205,7 +192,7 @@ class SettingsPage extends StatelessWidget {
           ),
           ListTile(
             leading: const Icon(Icons.notifications_outlined),
-            title: Text('notification_settings'.tr),
+            title: Text('notification_settings_title'.tr),
             trailing: const Icon(Icons.chevron_right),
             onTap: () {
               // TODO: 跳转到通知设置页面
@@ -213,7 +200,7 @@ class SettingsPage extends StatelessWidget {
           ),
 
           // 其他设置
-          _buildSectionHeader('other_settings'.tr),
+          _buildSectionHeader('other_settings_title'.tr),
           ListTile(
             leading: const Icon(Icons.help_outline),
             title: Text('help_and_feedback'.tr),

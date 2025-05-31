@@ -1,152 +1,165 @@
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:google_sign_in/google_sign_in.dart';
-import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:get/get.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
+import '../../core/config/supabase_config.dart';
 
 class AuthService extends GetxService {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  final GoogleSignIn _googleSignIn = GoogleSignIn();
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  late final SupabaseClient _supabase;
   
-  Rx<User?> currentUser = Rx<User?>(null);
+  final _isAuthenticated = false.obs;
+  bool get isAuthenticated => _isAuthenticated.value;
+  
+  final _user = Rx<User?>(null);
+  User? get currentUser => _user.value;
 
   @override
   void onInit() {
     super.onInit();
-    // 监听用户状态变化
-    _auth.authStateChanges().listen((User? user) {
-      currentUser.value = user;
-      if (user != null) {
-        _updateUserData(user);
-      }
+    _supabase = Supabase.instance.client;
+    
+    // 监听认证状态变化
+    _supabase.auth.onAuthStateChange.listen((data) {
+      _user.value = data.session?.user;
+      _isAuthenticated.value = data.session != null;
     });
   }
 
-  // Google 登录
-  Future<UserCredential?> signInWithGoogle() async {
+  Future<AuthResponse> signInWithApple() async {
     try {
-      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
-      if (googleUser == null) return null;
-
-      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
-      final credential = GoogleAuthProvider.credential(
-        accessToken: googleAuth.accessToken,
-        idToken: googleAuth.idToken,
-      );
-
-      final userCredential = await _auth.signInWithCredential(credential);
-      await _updateUserData(userCredential.user!, provider: 'google');
-      return userCredential;
-    } catch (e) {
-      print('Google sign in error: $e');
-      return null;
-    }
-  }
-
-  // Apple 登录
-  Future<UserCredential?> signInWithApple() async {
-    try {
-      final appleCredential = await SignInWithApple.getAppleIDCredential(
+      final credential = await SignInWithApple.getAppleIDCredential(
         scopes: [
           AppleIDAuthorizationScopes.email,
           AppleIDAuthorizationScopes.fullName,
         ],
+        webAuthenticationOptions: WebAuthenticationOptions(
+          clientId: SupabaseConfig.appleClientId,
+          redirectUri: Uri.parse(SupabaseConfig.appleRedirectUrl),
+        ),
       );
 
-      final oauthCredential = OAuthProvider('apple.com').credential(
-        idToken: appleCredential.identityToken,
-        accessToken: appleCredential.authorizationCode,
+      final response = await _supabase.auth.signInWithIdToken(
+        provider: OAuthProvider.apple,
+        idToken: credential.identityToken!,
       );
-
-      final userCredential = await _auth.signInWithCredential(oauthCredential);
-      await _updateUserData(userCredential.user!, provider: 'apple');
-      return userCredential;
+      return response;
     } catch (e) {
-      print('Apple sign in error: $e');
+      print('Apple登录失败: $e');
+      rethrow;
+    }
+  }
+
+  Future<void> signOut() async {
+    try {
+      await _supabase.auth.signOut();
+    } catch (e) {
+      print('登出失败: $e');
+      rethrow;
+    }
+  }
+
+  // 获取用户资料
+  Future<Map<String, dynamic>?> getUserProfile() async {
+    try {
+      if (!isAuthenticated) return null;
+      final userId = currentUser?.id;
+      if (userId == null) return null;
+      
+      final response = await _supabase
+          .from('profiles')
+          .select()
+          .eq('id', userId)
+          .single();
+          
+      return response;
+    } catch (e) {
+      print('获取用户资料失败: $e');
       return null;
     }
   }
 
-  // 微信登录
-  Future<void> signInWithWeChat() async {
-    // TODO: 实现微信登录
-    // 需要集成微信SDK
-  }
-
-  // 更新用户数据
-  Future<void> _updateUserData(User user, {String? provider}) async {
-    final userData = {
-      'email': user.email,
-      'updated_at': FieldValue.serverTimestamp(),
-      'last_login': FieldValue.serverTimestamp(),
-    };
-
-    if (provider != null) {
-      userData['auth_providers'] = FieldValue.arrayUnion([
-        {
-          'provider': provider,
-          'provider_uid': user.uid,
-          'email': user.email,
-          'connected_at': FieldValue.serverTimestamp(),
-        }
-      ]);
-    }
-
-    // 更新用户文档
-    await _firestore.collection('users').doc(user.uid).set(
-      userData,
-      SetOptions(merge: true),
-    );
-
-    // 确保用户配置文件存在
-    final profileDoc = await _firestore.collection('user_profiles').doc(user.uid).get();
-    if (!profileDoc.exists) {
-      await _firestore.collection('user_profiles').doc(user.uid).set({
-        'user_id': user.uid,
-        'display_name': user.displayName ?? '',
-        'avatar_url': user.photoURL ?? '',
-        'created_at': FieldValue.serverTimestamp(),
-        'preferences': {
-          'notification': {
-            'push_enabled': true,
-            'email_enabled': true,
-            'sms_enabled': true,
-          },
-          'privacy': {
-            'profile_visible': true,
-            'show_online': true,
-          }
-        }
-      });
-    }
-  }
-
-  // 退出登录
-  Future<void> signOut() async {
-    await _googleSignIn.signOut();
-    await _auth.signOut();
-  }
-
-  // 获取当前用户资料
-  Future<Map<String, dynamic>?> getCurrentUserProfile() async {
-    if (currentUser.value == null) return null;
-    
-    final doc = await _firestore
-        .collection('user_profiles')
-        .doc(currentUser.value!.uid)
-        .get();
-        
-    return doc.data();
-  }
-
   // 更新用户资料
   Future<void> updateUserProfile(Map<String, dynamic> data) async {
-    if (currentUser.value == null) return;
-    
-    await _firestore
-        .collection('user_profiles')
-        .doc(currentUser.value!.uid)
-        .update(data);
+    try {
+      if (!isAuthenticated) return;
+      final userId = currentUser?.id;
+      if (userId == null) return;
+      
+      await _supabase
+          .from('profiles')
+          .upsert({
+            'id': userId,
+            ...data,
+            'updated_at': DateTime.now().toIso8601String(),
+          });
+    } catch (e) {
+      print('更新用户资料失败: $e');
+      rethrow;
+    }
   }
+
+  // 邮箱登录
+  Future<AuthResponse> signInWithEmail({
+    required String email,
+    required String password,
+  }) async {
+    try {
+      final response = await _supabase.auth.signInWithPassword(
+        email: email,
+        password: password,
+      );
+      return response;
+    } catch (e) {
+      print('邮箱登录失败: $e');
+      rethrow;
+    }
+  }
+
+  // 邮箱注册
+  Future<AuthResponse> signUpWithEmail({
+    required String email,
+    required String password,
+    String? displayName,
+  }) async {
+    try {
+      final response = await _supabase.auth.signUp(
+        email: email,
+        password: password,
+        data: <String, String>{'display_name': displayName ?? ''},
+      );
+      return response;
+    } catch (e) {
+      print('邮箱注册失败: $e');
+      rethrow;
+    }
+  }
+
+  // 重置密码
+  Future<void> resetPassword(String email) async {
+    try {
+      await _supabase.auth.resetPasswordForEmail(email);
+    } catch (e) {
+      print('重置密码失败: $e');
+      rethrow;
+    }
+  }
+
+  // --- 以下为未实现的占位方法 ---
+  Future<void> signInWithGoogle() async {
+    throw UnimplementedError('Google 登录暂未实现');
+  }
+  Future<void> signInWithWeChat() async {
+    throw UnimplementedError('微信登录暂未实现');
+  }
+  //Future<Map<String, dynamic>?> getCurrentUserProfile() async {
+  //  throw UnimplementedError('获取用户资料暂未实现');
+  //}
+ // Future<AuthResponse> loginWithEmail({required String email, required String password}) async {
+ //   throw UnimplementedError('邮箱登录暂未实现');
+ // }
+ // Future<AuthResponse> registerWithEmail({required String email, required String password, required String displayName}) async {
+  //  throw UnimplementedError('邮箱注册暂未实现');
+  //}
+ // Future<void> sendPasswordResetEmail(String email) async {
+ //   throw UnimplementedError('重置密码暂未实现');
+  //}
 } 

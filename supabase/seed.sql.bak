@@ -1,0 +1,40 @@
+-- Clear related tables
+DELETE FROM public.provider_profiles;
+DELETE FROM public.addresses;
+DELETE FROM public.user_settings;
+DELETE FROM public.profiles;
+
+-- Note: User creation in cloud environments should be done via Supabase Auth API or the Authentication section in Studio.
+-- The IDs used below for profiles, user_settings, and addresses must match the IDs of users created via Auth.
+-- New User IDs from Cloud:
+-- alice@jinbean.com     2ef6d661-96ad-4754-92d3-1f90ebb852b8
+-- admin@jinbean.com     7baf21ab-38d3-4996-98da-c5f4325b96d4
+-- provider@jinbean.com  9790760b-6e6f-4e89-ad2a-e49f15684fb5
+
+-- Insert profiles
+INSERT INTO public.profiles (id, email, display_name, avatar_url, phone_number, user_type, status)
+VALUES
+  ('2ef6d661-96ad-4754-92d3-1f90ebb852b8', 'alice@jinbean.com', 'Alice JinBean', 'https://example.com/avatar_alice_new.jpg', '+1-613-555-1001', 'user', 'active'),
+  ('7baf21ab-38d3-4996-98da-c5f4325b96d4', 'admin@jinbean.com', 'Admin JinBean', 'https://example.com/avatar_admin_new.jpg', '+1-613-555-1002', 'admin', 'active'),
+  ('9790760b-6e6f-4e89-ad2a-e49f15684fb5', 'provider@jinbean.com', 'JinBean Provider', 'https://example.com/avatar_provider_new.jpg', '+1-613-555-2000', 'provider', 'active');
+
+-- Insert user settings
+INSERT INTO public.user_settings (id, theme, language, notification_enabled)
+VALUES
+  ('2ef6d661-96ad-4754-92d3-1f90ebb852b8', 'light', 'en', true),
+  ('7baf21ab-38d3-4996-98da-c5f4325b96d4', 'dark', 'en', false),
+  ('9790760b-6e6f-4e89-ad2a-e49f15684fb5', 'system', 'en', true);
+
+-- Insert addresses
+INSERT INTO public.addresses (user_id, address_type, address_line1, address_line2, city, state, postal_code, country, is_default)
+VALUES
+  -- Addresses for alice@jinbean.com
+  ('2ef6d661-96ad-4754-92d3-1f90ebb852b8', 'home', '456 Sparks St', 'Unit 301', 'Ottawa', 'Ontario', 'K1R 5A2', 'Canada', true),
+  ('2ef6d661-96ad-4754-92d3-1f90ebb852b8', 'work', '111 Sussex Dr', NULL, 'Ottawa', 'Ontario', 'K1N 1J1', 'Canada', false),
+  -- Address for admin@jinbean.com
+  ('7baf21ab-38d3-4996-98da-c5f4325b96d4', 'home', '789 Albert St', 'Apt 505', 'Ottawa', 'Ontario', 'K1R 5B1', 'Canada', true);
+
+-- Insert provider profiles
+INSERT INTO public.provider_profiles (id, business_name, business_description, business_phone, business_email, business_address, service_areas, service_categories, verification_status)
+VALUES
+  ('9790760b-6e6f-4e89-ad2a-e49f15684fb5', 'JinBean Services Ottawa', 'Providing various services in the Ottawa area.', '+1-613-555-2000', 'services.ottawa@jinbean.com', '100 Elgin St, Ottawa, ON K1P 5K8, Canada', ARRAY['Ottawa Central', 'West Ottawa'], ARRAY['Cleaning', 'Plumbing'], 'verified'); 
